@@ -51,12 +51,13 @@ profile::openstack::openrc::project_name: 'services'
 profile::openstack::network::plugin: calico
 
 profile::base::common::packages:
-  'networking-calico': {}
-  'gcc-c++': {}
-  'bash-completion': {}
+  'networking-calico':      {}
+  'gcc-c++':                {}
+  'bash-completion':        {}
   'bash-completion-extras': {}
-  'jq': {}
-  'openstack-selinux': {}
+  'jq':                     {}
+  'openstack-selinux':      {}
+  'python2-wsme':           {}
 
 # Sensu (needs gcc-c++)
 profile::monitoring::sensu::agent::plugins:
@@ -102,7 +103,11 @@ sudo::configs:
 
 profile::openstack::compute::hypervisor::fix_snapshot_loc: true # FIXME - Should probably be removed for newton release
 
-profile::openstack::telemetry::polling::polling_interval:  3600 # FIXME
+# Telemetry (we only need the pipeline.yaml setup)
+ceilometer::agent::notification::enabled:               false
+ceilometer::agent::notification::manage_service:        false
+ceilometer::agent::notification::manage_event_pipeline: false
+ceilometer::agent::notification::ack_on_event_error:    false
 
 calico::compute: true
 etcd::mode: 'proxy'

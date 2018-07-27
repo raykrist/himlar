@@ -27,16 +27,19 @@ ceilometer::agent::auth::auth_tenant_name:                      'services'
 
 # ceilometer notification agent (node: telemetry)
 ceilometer::agent::notification::manage_event_pipeline:         true
+ceilometer::agent::notification::manage_pipeline:               true
 ceilometer::agent::notification::event_pipeline_publishers:     ['gnocchi://']
+ceilometer::agent::notification::pipeline_publishers:           ['gnocchi://']
 ceilometer::agent::notification::messaging_urls:                "%{hiera('service__transport__url')}"
 
 # turn on namespace for in role
 ceilometer::agent::polling::central_namespace:                  false
 ceilometer::agent::polling::compute_namespace:                  false
 ceilometer::agent::polling::ipmi_namespace:                     false
+ceilometer::agent::polling::manage_polling:                     true
+ceilometer::agent::polling::polling_interval:                   3600 # default 600
 
 # gnocchi dispatcher (node: telemetry)
-ceilometer::dispatcher::gnocchi::url:                           "%{hiera('endpoint__metric__internal')}"
 ceilometer::dispatcher::gnocchi::filter_service_activity:       false
 ceilometer::dispatcher::gnocchi::archive_policy:                'low'
 

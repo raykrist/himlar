@@ -1,2 +1,3 @@
 ---
 ceilometer::debug: true
+ceilometer::agent::polling::polling_interval: 120

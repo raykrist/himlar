@@ -21,7 +21,7 @@ class profile::openstack::telemetry (
   include ::gnocchi::client
 
   # pipeline hack
-  include ::profile::openstack::telemetry::pipeline
+  #include ::profile::openstack::telemetry::pipeline
 
   # polling
   include ::profile::openstack::telemetry::polling

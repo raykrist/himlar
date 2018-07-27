@@ -10,7 +10,7 @@ class profile::openstack::compute(
 
   if $manage_telemetry {
     include ::profile::openstack::telemetry::polling
-    include ::profile::openstack::telemetry::pipeline
+    include ::ceilometer::agent::notification # needed to setup pipeline
   }
 
   if $manage_az {
