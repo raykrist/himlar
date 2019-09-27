@@ -1,6 +1,8 @@
 ---
 include:
   default:
+    - profile::database::mariadb
+    - profile::monitoring::sensu::mysql
     - profile::openstack::metric
     - profile::openstack::openrc
     - profile::logging::rsyslog::client
@@ -9,11 +11,14 @@ memcached::max_memory: '20%'
 
 profile::base::common::packages:
   'python-openstackclient': {}
-  'openstack-selinux': {}
-  'python-memcached': {} # gnocchi::manage_memcache_package are broken
+  'openstack-selinux':      {}
+  'python-memcached':       {} # gnocchi::manage_memcache_package are broken
+  'mysqltuner':             {}
 
-profile::openstack::metric::manage_firewall:  true
-profile::openstack::metric::manage_wsgi:      true
+profile::base::common::manage_cron:               true
+profile::openstack::metric::manage_firewall:      true
+profile::openstack::metric::manage_wsgi:          true
+profile::openstack::metric::gnocchi_db_enabled:   true
 profile::openstack::metric::firewall_extras:
   source: "%{::network_trp1}/%{::netmask_trp1}"
 
@@ -21,10 +26,81 @@ profile::openstack::openrc::password:         "%{hiera('gnocchi_api_password')}"
 profile::openstack::openrc::username:         'gnocchi'
 profile::openstack::openrc::project_name:     'services'
 
+# MariaDB
+profile::database::mariadb::manage_firewall:  false
+mysql__config__max_connections:               '64'
+
+wsrep_on:                                     'OFF'
+wsrep_cluster_name:                           'metric'
+
+# Sensu
+profile::monitoring::sensu::mysql::password:  "%{hiera('sensu_mysql_password')}"
+profile::monitoring::sensu::mysql::manage_packages: true
+
+profile::monitoring::sensu::agent::plugins:
+  sensu-plugins-mysql:
+    type:         package
+    pkg_version:  '2.3.0'
+
+profile::monitoring::sensu::agent::checks:
+  'metrics-mysql-graphite':
+    type:         'metric'
+    command:      'metrics-mysql-graphite.rb --scheme mysql.%{::hostname} -h localhost -S /var/lib/mysql/mysql.sock --ini /etc/sensu/conf.d/mysql.ini'
+    interval:     60
+    subscribers:  ['metrics']
+    handlers:     ['graphite_tcp']
+  'check-mysql-alive':
+    command:      'check-mysql-alive.rb -h localhost -s /var/lib/mysql/mysql.sock --ini /etc/sensu/conf.d/mysql.ini'
+    interval:     60
+    subscribers:  ['checks']
+
+# cronjob to purge deleted resources from the metric service
+profile::base::cron::crontabs:
+  purge_deleted_resources:
+    ensure:   present
+    command:  'source /root/openrc && /bin/gnocchi resource batch delete "ended_at < \"-30days\""'
+    hour:     '*'
+    minute:   30
+
+# Logrotate
+profile::logging::logrotate::manage_logrotate:   true
+logrotate::rules:
+  mysql:
+    path:           '/var/log/mysqld.log'
+    rotate:         14
+    postrotate: >-
+      if test -x /usr/bin/mysqladmin && /usr/bin/mysqladmin ping &>/dev/null; then
+            /usr/bin/mysqladmin --local flush-error-log flush-engine-log flush-general-log flush-slow-log
+          fi
+    sharedscripts:  true
+    copytruncate:   true
+    missingok:      true
+    rotate_every:   daily
+    compress:       true
+  syslog:
+    path:           ['/var/log/cron', '/var/log/maillog', '/var/log/messages', '/var/log/secure', '/var/log/spooler']
+    rotate:         10
+    rotate_every:   daily
+    postrotate:     '/bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true'
+    dateext:        true
+    sharedscripts:  true
+    missingok:      true
+    compress:       true
+
+# ... script creation
+profile::database::mariadb::backupuser:       'root'
+profile::database::mariadb::backuppassword:   "%{hiera('mysql::server::root_password')}"
+profile::database::mariadb::postscript:       "date >  %{hiera('profile::database::mariadb::backuptopdir')}/$(hostname)-backupflag"
+profile::database::mariadb::file_per_database: true
+profile::database::mariadb::maxallowedpacket:  4096
+
 # Enable extra yum repo
 profile::base::yumrepo::repo_hash:
   rdo-release:
     ensure: present
+    exclude: 'python2-bcrypt mariadb'
   epel: # should be absent when using RDO, but whitelist can also work
     ensure:   present
-    includepkgs: 'htop bash-completion-extras'
+    includepkgs: 'htop bash-completion-extras mysqltuner'
+  mariadb:
+    ensure: present

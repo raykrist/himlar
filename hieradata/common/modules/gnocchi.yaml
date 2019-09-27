@@ -23,7 +23,7 @@ gnocchi::keystone::authtoken::memcached_servers:  '127.0.0.1:11211'
 gnocchi::keystone::authtoken::token_cache_time:   300
 
 # db (node: metric)
-gnocchi::database_connection: "mysql://gnocchi:%{hiera('gnocchi::db::mysql::password')}@%{hiera('service__address__db_regional')}/gnocchi"
+gnocchi::database_connection: "mysql://gnocchi:%{hiera('gnocchi::db::mysql::password')}@%{::ipaddress_trp1}/gnocchi"
 gnocchi::db::mysql::dbname:   'gnocchi'
 gnocchi::db::mysql::user:     'gnocchi'
 gnocchi::db::mysql::allowed_hosts:

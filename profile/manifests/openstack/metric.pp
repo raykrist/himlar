@@ -2,10 +2,11 @@
 # Setup metric role with gnocchi
 #
 class profile::openstack::metric (
-  $manage_firewall   = false,
-  $manage_wsgi       = false,
-  $metric_ports      = ['8041'],
-  $firewall_extras   = {},
+  $manage_firewall    = false,
+  $manage_wsgi        = false,
+  $metric_ports       = ['8041'],
+  $firewall_extras    = {},
+  $gnocchi_db_enabled = false
 )  {
 
   include ::gnocchi
@@ -37,5 +38,9 @@ class profile::openstack::metric (
       proto  => 'udp',
       extras => $firewall_extras,
     }
+  }
+
+  if $gnocchi_db_enabled {
+    include ::gnocchi::db::mysql
   }
 }
