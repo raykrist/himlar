@@ -45,8 +45,8 @@ users_panel = identity_dashboard.get_panel("users")
 identity_dashboard.unregister(users_panel.__class__)
 
 # Remove Identity->Application Credentials
-ac_panel = identity_dashboard.get_panel("application_credentials")
-identity_dashboard.unregister(ac_panel.__class__)
+# ac_panel = identity_dashboard.get_panel("application_credentials")
+# identity_dashboard.unregister(ac_panel.__class__)
 
 # Object storage
 container_panel = project_dashboard.get_panel("containers")
