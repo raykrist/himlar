@@ -30,6 +30,12 @@ profile::base::common::packages:
   'openstack-selinux': {}
   'python-memcached': {}
 
+nova::config::nova_config:
+  oslo_middleware/max_request_body_size: # FIXME:train move to nova::max_request_body_size
+    value: '524288'
+  oslo_middleware/enable_proxy_headers_parsing: # FIXME:train move to nova::enable_proxy_headers_parsing
+    value: true
+
 # Sensu
 profile::webserver::apache::status::manage_status: true
 profile::monitoring::sensu::agent::plugins:
