@@ -212,6 +212,7 @@ mgmt__address__repo:              "repo.%{hiera('domain_mgmt')}"
 mgmt__address__ns:                "%{hiera('netcfg_mgmt_net_c0')}.16"
 mgmt__address__resolver_01:       "%{hiera('netcfg_mgmt_net_c0')}.17"
 mgmt__address__resolver_02:       "%{hiera('netcfg_mgmt_net_c0')}.18"
+mgmt__address__metric:            "metric.%{hiera('domain_mgmt')}"
 
 #
 # Endpoints (including protocole)
@@ -416,6 +417,7 @@ profile::network::services::dns_records:
     "repo.%{hiera('domain_mgmt')}":                         "%{hiera('netcfg_mgmt_net_c0')}.11"
     "logger.%{hiera('domain_mgmt')}":                       "%{hiera('netcfg_mgmt_net_c0')}.13"
     "monitor.%{hiera('domain_mgmt')}":                      "%{hiera('netcfg_mgmt_net_c0')}.14"
+    "metric.%{hiera('domain_mgmt')}":                      "%{hiera('netcfg_mgmt_net_c0')}.96"
     "builder.%{hiera('domain_mgmt')}":                      "%{hiera('netcfg_mgmt_net_c0')}.15"
     "git.%{hiera('domain_mgmt')}":                          "%{hiera('netcfg_mgmt_net_c0')}.10"
     "dashboard.%{hiera('domain_mgmt')}":                    "%{hiera('netcfg_mgmt_net_c0')}.54"
