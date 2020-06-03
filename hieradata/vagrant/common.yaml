@@ -166,6 +166,7 @@ profile::network::services::dns_records:
     "volume.api.%{hiera('domain_public')}":               "%{hiera('netcfg_public_netpart')}.250"
     "status.%{hiera('domain_frontend')}":                 "%{hiera('netcfg_public_netpart')}.250"
     "metric.api.%{hiera('domain_public')}":               "%{hiera('netcfg_public_netpart')}.250"
+    "rating.api.%{hiera('domain_public')}":               "%{hiera('netcfg_public_netpart')}.250"
     "object.api.%{hiera('domain_public')}":               "%{hiera('netcfg_public_netpart')}.250"
     "dns.api.%{hiera('domain_public')}":                  "%{hiera('netcfg_public_netpart')}.250"
     "report.%{hiera('domain_frontend')}":                 "%{hiera('netcfg_public_netpart')}.250"
@@ -210,6 +211,7 @@ ceilometer_api_password:                            'ceilometer_pass'
 access_api_password:                                'access_pass'
 designate_api_password:                             'designate_pass'
 radosgw_api_password:                               'radosgw_pass'
+cloudkitty_api_password:                            'cloudkitty_pass'
 
 # rabbitmq
 rabbitmq::default_pass:                             'guest'
@@ -235,6 +237,9 @@ horizon_db_password:                                'horizon_pass'
 # keystone.yaml
 keystone::db::mysql::password:                      'key_pass'
 keystone::admin_token:                              'admintoken'
+# cloudkitty.yaml
+cloudkitty::db::mysql::password:                    'cloudkitty_pass'
+cloudkitty_rabbit_password:                         'cloudkitty_quest'
 
 # master.yaml
 rbd_volumes_rbd_secret_uuid:                        'AQBypF1V2JYiChAA2qYbjM6jbXJBMmpXPkvwBg=='

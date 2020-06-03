@@ -1,0 +1,82 @@
+---
+# db (node: db-02)
+cloudkitty::db::mysql::dbname:   'cloudkitty'
+cloudkitty::db::mysql::user:     'cloudkitty'
+cloudkitty::db::mysql::allowed_hosts:
+  - "%{hiera('netcfg_trp_netpart')}.%"
+
+# db (node: rating)
+cloudkitty::db::database_connection:      "mysql+pymysql://cloudkitty:%{hiera('cloudkitty::db::mysql::password')}@%{hiera('service__address__db_regional')}/cloudkitty"
+
+# keystone setup (node: identity)
+cloudkitty::keystone::auth::auth_name:                  'cloudkitty'
+cloudkitty::keystone::auth::password:                   "%{hiera('cloudkitty_api_password')}"
+cloudkitty::keystone::auth::public_url:                 "%{hiera('endpoint__rating__public')}"
+cloudkitty::keystone::auth::admin_url:                  "%{hiera('endpoint__rating__admin')}"
+cloudkitty::keystone::auth::internal_url:               "%{hiera('endpoint__rating__internal')}"
+cloudkitty::keystone::auth::region:                     "%{::location}"
+cloudkitty::keystone::auth::manage_rating_role:         true
+cloudkitty::keystone::auth::rating_role:                'rating'
+cloudkitty::keystone::auth::service_name:               'cloudkitty'
+cloudkitty::keystone::auth::tenant:                     "%{hiera('keystone__service__project')}"
+
+# keystone setup (node: rating)
+cloudkitty::keystone::authtoken::username:              'cloudkitty'
+cloudkitty::keystone::authtoken::password:              "%{hiera('cloudkitty_api_password')}"
+cloudkitty::keystone::authtoken::www_authenticate_uri:  "%{hiera('endpoint__identity__public')}"
+cloudkitty::keystone::authtoken::auth_url:              "%{hiera('endpoint__identity__admin')}/v3"
+cloudkitty::keystone::authtoken::region_name:           "%{::location}"
+cloudkitty::keystone::authtoken::auth_version:          'v3'
+cloudkitty::keystone::authtoken::service_token_roles_required: true
+
+cloudkitty::keystone::authtoken::project_domain_name:   "%{hiera('keystone__default__domain')}"
+cloudkitty::keystone::authtoken::user_domain_name:      "%{hiera('keystone__default__domain')}"
+cloudkitty::keystone::authtoken::project_name:          "%{hiera('keystone__service__project')}"
+
+# keystone middleware cache
+cloudkitty::keystone::authtoken::memcached_servers:     '127.0.0.1:11211'
+cloudkitty::keystone::authtoken::token_cache_time:      300
+
+# api (node: rating)
+cloudkitty::api::enabled:                               false
+cloudkitty::api::manage_service:                        false
+cloudkitty::api::sync_db:                               true
+cloudkitty::api::service_name:                          'httpd'
+
+cloudkitty::wsgi::apache::server_name:                  "%{::location}-rating-01.%{hiera('domain_trp')}"
+cloudkitty::wsgi::apache::bind_host:                    "%{::ipaddress_trp1}"
+cloudkitty::wsgi::apache::port:                         8889
+cloudkitty::wsgi::apache::workers:                      2
+cloudkitty::wsgi::apache::threads:                      2
+cloudkitty::wsgi::apache::ssl:                          false
+
+# cloudkitty (node: rating)
+#cloudkitty::purge_config:                               true
+cloudkitty::region_name:                                "%{::location}"
+cloudkitty::enable_proxy_headers_parsing:               true
+cloudkitty::storage_version:                            '1'
+cloudkitty::storage_backend:                            'sqlalchemy'
+
+# rabbit mq (node: rating)
+cloudkitty::default_transport_url:         "rabbit://cloudkitty:%{hiera('cloudkitty_rabbit_password')}@%{hiera('service__address__rabbitmq_01')}:5672/cloudkitty"
+cloudkitty::notification_transport_url:    "%{hiera('service__transport__url')}"
+cloudkitty::notification_driver:           'messagingv2'
+cloudkitty::notification_topics:           'notifications'
+
+# processor (node: rating)
+cloudkitty::processor::collector:           'gnocchi'
+cloudkitty::processor::period:              300
+cloudkitty::processor::services:            compute
+  # - image
+  # - volume
+  # - network.bw.in
+  # - network.bw.out
+  # - network.floating
+
+cloudkitty::config::cloudkitty_config:
+  'collect/metrics_conf':
+    value: '/etc/cloudkitty/metrics.yml'
+
+# logging (node: rating)
+cloudkitty::logging::debug:                 true
+cloudkitty::logging::use_syslog:            true

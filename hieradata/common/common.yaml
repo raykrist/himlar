@@ -243,6 +243,9 @@ endpoint__metric__public:         "https://metric.api.%{hiera('domain_public')}:
 endpoint__object__admin:          "http://object.%{hiera('domain_trp')}:8080"
 endpoint__object__internal:       "http://object.%{hiera('domain_trp')}:8080"
 endpoint__object__public:         "https://object.api.%{hiera('domain_public')}:8080"
+endpoint__rating__admin:          "http://rating.%{hiera('domain_trp')}:8889"
+endpoint__rating__internal:       "http://rating.%{hiera('domain_trp')}:8889"
+endpoint__rating__public:         "https://rating.api.%{hiera('domain_public')}:8889"
 
 #
 # DNS (merge of this and location)
@@ -290,6 +293,7 @@ profile::network::services::dns_records:
     "%{::location}-novactrl-01.%{hiera('domain_mgmt')}":    "%{hiera('netcfg_mgmt_net_c0')}.66"
     "%{::location}-novactrl-02.%{hiera('domain_mgmt')}":    "%{hiera('netcfg_mgmt_net_c0')}.67"
     "%{::location}-novactrl-03.%{hiera('domain_mgmt')}":    "%{hiera('netcfg_mgmt_net_c0')}.68"
+    "%{::location}-rating-01.%{hiera('domain_mgmt')}":      "%{hiera('netcfg_mgmt_net_c0')}.69"
     "%{::location}-network-01.%{hiera('domain_mgmt')}":     "%{hiera('netcfg_mgmt_net_c0')}.71"
     "%{::location}-network-02.%{hiera('domain_mgmt')}":     "%{hiera('netcfg_mgmt_net_c0')}.72"
     "%{::location}-network-03.%{hiera('domain_mgmt')}":     "%{hiera('netcfg_mgmt_net_c0')}.73"
@@ -435,6 +439,7 @@ profile::network::services::dns_records:
     "status.%{hiera('domain_trp')}":                        "%{hiera('netcfg_trp_net_c0')}.21"
     "mq01.%{hiera('domain_trp')}":                          "%{hiera('netcfg_trp_net_c0')}.31"
     "%{::location}-access-01.%{hiera('domain_trp')}":       "%{hiera('netcfg_trp_net_c0')}.56"
+    "%{::location}-rating-01.%{hiera('domain_trp')}":       "%{hiera('netcfg_trp_net_c0')}.69"
     "%{::location}-metric-01.%{hiera('domain_trp')}":       "%{hiera('netcfg_trp_net_c0')}.96"
     "%{::location}-report-01.%{hiera('domain_trp')}":       "%{hiera('netcfg_trp_net_c0')}.22"
     # trp api services
@@ -447,6 +452,7 @@ profile::network::services::dns_records:
     "identity.%{hiera('domain_trp')}":                      "%{hiera('netcfg_trp_net_c0')}.86"
     "object.%{hiera('domain_trp')}":                        "%{hiera('netcfg_trp_net_c0')}.86"
     "metric.%{hiera('domain_trp')}":                        "%{hiera('netcfg_trp_net_c0')}.86"
+    "rating.%{hiera('domain_trp')}":                        "%{hiera('netcfg_trp_net_c0')}.86"
   PTR:
     # mgmt
     "1.%{hiera('reverse_mgmt_c0')}":      "%{::location}-torack-01.%{hiera('domain_mgmt')}"

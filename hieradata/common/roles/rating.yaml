@@ -1,0 +1,21 @@
+---
+include:
+  default:
+    - profile::openstack::openrc
+    - profile::openstack::cache
+    - profile::openstack::rating
+
+openstack_version: 'stein' #FIXME:stein
+
+profile::openstack::rating::manage_firewall:  true
+profile::openstack::rating::manage_wsgi:      true
+profile::openstack::rating::manage_processor: true
+
+profile::openstack::openrc::password:     "%{hiera('cloudkitty_api_password')}"
+profile::openstack::openrc::username:     'cloudkitty'
+profile::openstack::openrc::project_name: "%{hiera('keystone__service__project')}"
+
+# Enable extra yum repo
+profile::base::yumrepo::repo_hash:
+  rdo-release:
+    ensure: present

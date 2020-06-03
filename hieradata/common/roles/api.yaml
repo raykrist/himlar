@@ -39,8 +39,8 @@ profile::base::network::manage_dummy:                               true
 profile::highavailability::loadbalancing::haproxy::manage_haproxy:  true
 profile::highavailability::loadbalancing::haproxy::manage_firewall: true
 profile::highavailability::loadbalancing::haproxy::firewall_ports:
-  public:    ['80', '443', '5000', '8041', '8774', '8776', '9292', '9696', '6080', '8080', '8778', '9001']
-  internal:  ['5000', '8041', '8774', '8776', '9292', '9696', '35357', '8080', '8778', '9001']
+  public:    ['80', '443', '5000', '8041', '8774', '8776', '9292', '9696', '6080', '8080', '8778', '8889', '9001']
+  internal:  ['5000', '8041', '8774', '8776', '9292', '9696', '35357', '8080', '8778', '8889', '9001']
   mgmt:      ['9000']
   limited:   []
 
@@ -99,6 +99,7 @@ profile::highavailability::loadbalancing::haproxy::haproxy_mapfile:
       - "identity.api.%{hiera('domain_public2')}:5000":     'bk_identity'
       - "network.api.%{hiera('domain_public2')}:9696":      'bk_network'
       - "metric.api.%{hiera('domain_public2')}:8041":       'bk_metric'
+      - "rating.api.%{hiera('domain_public2')}:8889":       'bk_rating'
       - "compute.api.%{hiera('domain_public2')}:8774":      'bk_compute'
       - "placement.api.%{hiera('domain_public2')}:8778":    'bk_placement'
       - "volume.api.%{hiera('domain_public2')}:8776":       'bk_volume'
@@ -127,6 +128,7 @@ profile::highavailability::loadbalancing::haproxy::haproxy_mapfile:
       - "image.%{hiera('domain_trp')}:9292":            'bk_image'
       - "dns.%{hiera('domain_trp')}:9001":              'bk_dns'
       - "object.%{hiera('domain_trp')}:8080":           'bk_object'
+      - "rating.%{hiera('domain_trp')}:8889":           'bk_rating'
 
 # HAproxy backends: public, internal and haproxy monitor
 profile::highavailability::loadbalancing::haproxy::haproxy_frontends:
@@ -140,6 +142,7 @@ profile::highavailability::loadbalancing::haproxy::haproxy_frontends:
       "%{::ipaddress_public1}:8776":  ['ssl', 'crt', "%{hiera('star_api_ssl_pem')}", 'crt', "%{hiera('star_api_ssl_pem2')}"]
       "%{::ipaddress_public1}:9292":  ['ssl', 'crt', "%{hiera('star_api_ssl_pem')}", 'crt', "%{hiera('star_api_ssl_pem2')}"]
       "%{::ipaddress_public1}:9696":  ['ssl', 'crt', "%{hiera('star_api_ssl_pem')}", 'crt', "%{hiera('star_api_ssl_pem2')}"]
+      "%{::ipaddress_public1}:8889":  ['ssl', 'crt', "%{hiera('star_api_ssl_pem')}", 'crt', "%{hiera('star_api_ssl_pem2')}"]
       "%{::ipaddress_public1}:9001":  ['ssl', 'crt', "%{hiera('star_api_ssl_pem')}", 'crt', "%{hiera('star_api_ssl_pem2')}"]
       "%{::ipaddress_public1}:443":   ['ssl', 'crt', "%{hiera('frontend_star_ssl_pem')}", 'crt', "%{hiera('frontend_star_ssl_pem2')}"]
       "%{::ipaddress_public1}:80":    []
@@ -171,6 +174,7 @@ profile::highavailability::loadbalancing::haproxy::haproxy_frontends:
       "%{::ipaddress_trp1}:9292":  [] # image
       "%{::ipaddress_trp1}:9696":  [] # neutron
       "%{::ipaddress_trp1}:8080":  [] # object
+      "%{::ipaddress_trp1}:8889":  [] # cloudkitty
       "%{::ipaddress_trp1}:9001":  [] # designate
       "%{::ipaddress_trp1}:8778":  [] # placement
     options:
@@ -229,6 +233,10 @@ profile::highavailability::loadbalancing::haproxy::haproxy_backends:
     options:
       - option:       'httplog'
       - errorfile:    '503 /etc/haproxy/error.api.http'
+  bk_rating:
+    options:
+      - option:       'httplog'
+      - errorfile:    '503 /etc/haproxy/error.api.http'
   bk_dns:
     options:
       - option:       'httplog'
@@ -277,6 +285,8 @@ image__backend__names:     ['%{::location}-image-01']
 image__backend__ips:       ["%{hiera('netcfg_trp_netpart')}.36"]
 object__backend__names:    []
 object__backend__ips:      []
+rating__backend__names:    ['%{::location}-rating-01']
+rating__backend__ips:      ["%{hiera('netcfg_trp_netpart')}.69"]
 status__backend__names:    ['%{::location}-status-01']
 status__backend__ips:      ["%{hiera('netcfg_trp_netpart')}.21"]
 dns__backend__names:       ['%{::location}-dns-01']
@@ -306,6 +316,12 @@ profile::highavailability::loadbalancing::haproxy::haproxy_balancermembers:
     server_names:       "%{alias('metric__backend__names')}"
     ipaddresses:        "%{alias('metric__backend__ips')}"
     ports:              '8041'
+    options:            'check'
+  rating:
+    listening_service:  'bk_rating'
+    server_names:       "%{alias('rating__backend__names')}"
+    ipaddresses:        "%{alias('rating__backend__ips')}"
+    ports:              '8889'
     options:            'check'
   compute:
     listening_service:  'bk_compute'
@@ -414,6 +430,10 @@ profile::base::selinux::ports:
     seltype:  'http_port_t'
     protocol: 'tcp'
     port:     9001
+  rating-http:
+    seltype:  'http_port_t'
+    protocol: 'tcp'
+    port:     8889
 
 # Errorpage for api, not used for status!
 profile::highavailability::loadbalancing::haproxy::haproxy_errorpage:

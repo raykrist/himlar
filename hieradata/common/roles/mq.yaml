@@ -65,6 +65,8 @@ profile::messaging::rabbitmq::users:
     password: "%{hiera('himlarcli_rabbit_password')}"
   access:
     password: "%{hiera('access_rabbit_password')}"
+  cloudkitty:
+    password: "%{hiera('cloudkitty_rabbit_password')}"
 #  glance:
 #    password: "%{hiera('glance::rabbit_password')}"
 
@@ -75,6 +77,7 @@ profile::messaging::rabbitmq::vhosts:
   ceilometer: {}
   designate: {}
   himlarcli: {}
+  cloudkitty: {}
 #  glance: {}
 
 profile::messaging::rabbitmq::user_permissions:
@@ -95,6 +98,10 @@ profile::messaging::rabbitmq::user_permissions:
     write_permission:     '.*'
     read_permission:      '.*'
   'ceilometer@ceilometer':
+    configure_permission: '.*'
+    write_permission:     '.*'
+    read_permission:      '.*'
+  'cloudkitty@cloudkitty':
     configure_permission: '.*'
     write_permission:     '.*'
     read_permission:      '.*'
@@ -120,6 +127,8 @@ profile::messaging::rabbitmq::user_permissions:
   'local@ceilometer':
     read_permission:      '.*'
   'local@designate':
+    read_permission:      '.*'
+  'local@cloudkitty':
     read_permission:      '.*'
   'local@himlarcli':
     read_permission:      '.*'
